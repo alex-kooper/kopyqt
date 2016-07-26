@@ -27,9 +27,9 @@ class Form(QDialog):
         self.error_message = self._create_error_field()
 
         fields = QFormLayout()
-        fields.addRow("First Name", self.first_name)
-        fields.addRow("Last Name", self.last_name)
-        fields.addRow("Full Name", self.full_name)
+        fields.addRow('First Name', self.first_name)
+        fields.addRow('Last Name', self.last_name)
+        fields.addRow('Full Name', self.full_name)
         fields.addRow(None, self.error_message)
 
         self.send_button = self._create_button('Send', self.send)
@@ -133,4 +133,3 @@ if __name__ == '__main__':
     f = Form()
     f.show()
     sys.exit(app.exec_())
-
