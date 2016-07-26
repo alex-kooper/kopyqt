@@ -1,32 +1,30 @@
 import sys
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import (
+    QApplication,
+    qApp,
+    QFormLayout,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLayout,
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton
+)
+
 
 class Form(QDialog):
-    
     def __init__(self):
         super().__init__()
-        self.create_widgets()
-        self.setWindowTitle('Simple Form')    
+
+        self.setWindowTitle('Simple Form')
         
-    def create_widgets(self):
-        self.first_name = QLineEdit()
-        self.first_name.setFixedWidth(300)
-        self.first_name.textChanged.connect(self.update_full_name)
-        self.first_name.textChanged.connect(self.validate_names)
-        self.first_name.textChanged.connect(self.enable_buttons)
-
-        self.last_name = QLineEdit()
-        self.last_name.setFixedWidth(300)
-        self.last_name.textChanged.connect(self.update_full_name)
-        self.last_name.textChanged.connect(self.validate_names)
-        self.last_name.textChanged.connect(self.enable_buttons)
-
+        self.first_name = self._create_name_field()
+        self.last_name = self._create_name_field()
         self.full_name = QLabel()
-        self.error_message = QLabel()
-        self.error_message.setStyleSheet('color: red')
-        self.error_message.hide()
+        self.error_message = self._create_error_field()
 
         fields = QFormLayout()
         fields.addRow("First Name", self.first_name)
@@ -34,17 +32,9 @@ class Form(QDialog):
         fields.addRow("Full Name", self.full_name)
         fields.addRow(None, self.error_message)
 
-        self.send_button = QPushButton("Send")
-        self.send_button.setEnabled(False)
-        self.send_button.clicked.connect(self.send)
-
-        self.clear_button = QPushButton("Clear")
-        self.clear_button.setEnabled(False)
-        self.clear_button.clicked.connect(self.reset_names)
-
-        close_button = QPushButton("&Close")
-        close_button.clicked.connect(qApp.quit)
-        close_button.setDefault(True)
+        self.send_button = self._create_button('Send', self.send)
+        self.clear_button = self._create_button('Clear', self.reset_names)
+        close_button = self._create_button('&Close', qApp.quit, is_enabled=True, is_default=True)
 
         buttons = QHBoxLayout()
         buttons.addStretch(1)
@@ -57,12 +47,11 @@ class Form(QDialog):
         vb.addStretch(1)
         vb.addLayout(buttons)
         
-        # vb.setSizeConstraint(QLayout.SetFixedSize)
+        vb.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(vb)    
 
     def update_full_name(self):
-        full_name = (self.first_name.text().strip()
-                     + ' ' +
+        full_name = (self.first_name.text().strip() + ' ' +
                      self.last_name.text().strip()).upper().strip()  
 
         self.full_name.setText(full_name)
@@ -100,9 +89,9 @@ class Form(QDialog):
 
         if (fn.strip() and ln.strip() and 
             self.is_valid_name(fn) and self.is_valid_name(ln)):
-           self.send_button.setEnabled(True)
+            self.send_button.setEnabled(True)
         else:
-           self.send_button.setEnabled(False)
+            self.send_button.setEnabled(False)
 
     def reset_names(self):
         self.first_name.setText('')
@@ -112,6 +101,31 @@ class Form(QDialog):
         msg = "The name {}\nwas sent to the server.".format(self.full_name.text())
         QMessageBox.information(self, 'Success!', msg)
         self.reset_names()
+
+    def _create_name_field(self):
+        le = QLineEdit()
+
+        le.setFixedWidth(300)
+        le.textChanged.connect(self.update_full_name)
+        le.textChanged.connect(self.validate_names)
+        le.textChanged.connect(self.enable_buttons)
+
+        return le
+
+    @staticmethod
+    def _create_error_field():
+        em = QLabel()
+        em.setStyleSheet('color: red')
+        em.hide()
+        return em
+
+    @staticmethod
+    def _create_button(name, callback, is_enabled=False, is_default=False):
+        b = QPushButton(name)
+        b.setEnabled(is_enabled)
+        b.setDefault(is_default)
+        b.clicked.connect(callback)
+        return b
 
 
 if __name__ == '__main__':
